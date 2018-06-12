@@ -1,0 +1,15 @@
+[submodule "lib/vpr"]
+	path = lib/vpr
+	url = git@github.com:VeloPayments/vpr
+[submodule "lib/googletest"]
+	path = lib/googletest
+	url = git@github.com:VeloPayments/googletest
+[submodule "lib/vccrypt"]
+	path = lib/vccrypt
+	url = git@github.com:VeloPayments/vccrypt
+[submodule "lib/vccert"]
+	path = lib/vccert
+	url = git@github.com:VeloPayments/vccert
+[submodule "lib/vcdb"]
+	path = lib/vcdb
+	url = git@github.com:VeloPayments/vcdb

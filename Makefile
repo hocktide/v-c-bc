@@ -3,7 +3,7 @@ BUILD_DIR=$(CURDIR)/build
 HOST_CHECKED_BUILD_DIR=$(BUILD_DIR)/host/checked
 
 #vpr options
-VPR_DIR?=../vpr
+VPR_DIR?=$(CURDIR)/lib/vpr
 VPR_INCLUDE_PATH?=$(VPR_DIR)/include
 VPR_CFLAGS=-I $(VPR_INCLUDE_PATH)
 VPR_HOST_CHECKED_LIB_DIR?=$(VPR_DIR)/build/host/checked
@@ -12,7 +12,7 @@ VPR_HOST_CHECKED_LINK?=-L $(VPR_HOST_CHECKED_LIB_DIR) -lvpr
 VPR_HOST_RELEASE_LINK?=-L $(VPR_HOST_RELEASE_LIB_DIR) -lvpr
 
 #vccrypt options
-VCCRYPT_DIR?=../vccrypt
+VCCRYPT_DIR?=$(CURDIR)/lib/vccrypt
 VCCRYPT_INCLUDE_PATH?=$(VCCRYPT_DIR)/include
 VCCRYPT_CFLAGS=-I $(VCCRYPT_INCLUDE_PATH)
 VCCRYPT_HOST_CHECKED_LIB_DIR?=$(VCCRYPT_DIR)/build/host/checked
@@ -21,7 +21,7 @@ VCCRYPT_HOST_CHECKED_LINK?=-L $(VCCRYPT_HOST_CHECKED_LIB_DIR) -lvccrypt
 VCCRYPT_HOST_RELEASE_LINK?=-L $(VCCRYPT_HOST_RELEASE_LIB_DIR) -lvccrypt
 
 #vccert options
-VCCERT_DIR?=../vccert
+VCCERT_DIR?=$(CURDIR)/lib/vccert
 VCCERT_INCLUDE_PATH?=$(VCCERT_DIR)/include
 VCCERT_CFLAGS=-I $(VCCERT_INCLUDE_PATH)
 VCCERT_HOST_CHECKED_LIB_DIR?=$(VCCERT_DIR)/build/host/checked
@@ -30,8 +30,11 @@ VCCERT_HOST_CHECKED_LINK?=-L $(VCCERT_HOST_CHECKED_LIB_DIR) -lvccert
 VCCERT_HOST_RELEASE_LINK?=-L $(VCCERT_HOST_RELEASE_LIB_DIR) -lvccert
 
 #model check options
-MODEL_CHECK_DIR?=../vcmodel
+MODEL_CHECK_DIR?=$(CURDIR)/lib/vcmodel
 include $(MODEL_CHECK_DIR)/model_check.mk
+
+#Openbsd compat
+PWD?=$(CURDIR)
 
 #library source files
 SRCDIR=$(PWD)/src
@@ -127,15 +130,59 @@ CORTEXMHARD_RELEASE_CXXFLAGS=-std=gnu++14 $(COMMON_CXXFLAGS) -O2 \
 
 #phony targets
 .PHONY: ALL clean test host.lib.checked host.lib.release cortexmsoft.lib.release
-.PHONY: cortexmhard.lib.release
+.PHONY: cortexmhard.lib.release libdepends test.libdepends clean.libdepends
+.PHONY: build.lib.vpr build.lib.vccrypt build.lib.vccert build.lib.vcdb
+.PHONY: test.lib.vpr test.lib.vccrypt test.lib.vccert test.lib.vcdb
+.PHONY: clean.lib.vpr clean.lib.vccrypt clean.lib.vccert clean.lib.vcdb
 
 #main build target
 ALL: host.lib.checked host.lib.release cortexmsoft.lib.release
 ALL: cortexmhard.lib.release
 
+libdepends: build.lib.vpr build.lib.vccrypt build.lib.vccert build.lib.vcdb
+test.libdepends: test.lib.vpr test.lib.vccrypt test.lib.vccert test.lib.vcdb
+clean.libdepends: clean.lib.vpr clean.lib.vccrypt clean.lib.vccert
+clean.libdepends: clean.lib.vcdb
+
+build.lib.vpr:
+	(cd lib/vpr && $(MAKE))
+
+build.lib.vccrypt:
+	(cd lib/vccrypt && $(MAKE))
+
+build.lib.vccert:
+	(cd lib/vccert && $(MAKE))
+
+build.lib.vcdb:
+	(cd lib/vcdb && $(MAKE))
+
+test.lib.vpr:
+	(cd lib/vpr && $(MAKE) test)
+
+test.lib.vccrypt:
+	(cd lib/vccrypt && $(MAKE) test)
+
+test.lib.vccert:
+	(cd lib/vccert && $(MAKE) test)
+
+test.lib.vcdb:
+	(cd lib/vcdb && $(MAKE) test)
+
+clean.lib.vpr:
+	(cd lib/vpr && $(MAKE) clean)
+
+clean.lib.vccrypt:
+	(cd lib/vccrypt && $(MAKE) clean)
+
+clean.lib.vccert:
+	(cd lib/vccert && $(MAKE) clean)
+
+clean.lib.vcdb:
+	(cd lib/vcdb && $(MAKE) clean)
+
 #host targets
-host.lib.checked: $(HOST_CHECKED_DIRS) $(HOST_CHECKED_LIB)
-host.lib.release: $(HOST_RELEASE_DIRS) $(HOST_RELEASE_LIB)
+host.lib.checked: libdepends $(HOST_CHECKED_DIRS) $(HOST_CHECKED_LIB)
+host.lib.release: libdepends $(HOST_RELEASE_DIRS) $(HOST_RELEASE_LIB)
 
 #cortex M4 soft floating point targets
 cortexmsoft.lib.release: $(CORTEXMSOFT_RELEASE_DIRS) $(CORTEXMSOFT_RELEASE_LIB)
@@ -195,10 +242,10 @@ $(CORTEXMHARD_RELEASE_BUILD_DIR)/%.o: $(SRCDIR)/%.c
 	mkdir -p $(dir $@)
 	$(CORTEXMHARD_RELEASE_CC) $(CORTEXMHARD_RELEASE_CFLAGS) -c -o $@ $<
 
-test: $(TEST_DIRS) host.lib.checked $(TESTLIBVCBLOCKCHAIN)
+test: test.libdepends $(TEST_DIRS) host.lib.checked $(TESTLIBVCBLOCKCHAIN)
 	LD_LIBRARY_PATH=$(TOOLCHAIN_DIR)/host/lib:$(TOOLCHAIN_DIR)/host/lib64:$(LD_LIBRARY_PATH) $(TESTLIBVCBLOCKCHAIN)
 
-clean:
+clean: clean.libdepends
 	rm -rf $(BUILD_DIR)
 
 $(TESTLIBVCBLOCKCHAIN): $(HOST_CHECKED_OBJECTS) $(TEST_OBJECTS) $(GTEST_OBJ)

@@ -8,6 +8,12 @@ VPR_INCLUDE_PATH?=$(VPR_DIR)/include
 VPR_CFLAGS=-I $(VPR_INCLUDE_PATH)
 VPR_HOST_CHECKED_LIB_DIR?=$(VPR_DIR)/build/host/checked
 VPR_HOST_RELEASE_LIB_DIR?=$(VPR_DIR)/build/host/release
+VPR_CORTEXMSOFT_RELEASE_LIB_DIR?=$(VPR_DIR)/build/cortex-m4-softfp/release
+VPR_CORTEXMHARD_RELEASE_LIB_DIR?=$(VPR_DIR)/build/cortex-m4-hardfp/release
+VPR_HOST_CHECKED_LIB?=$(VPR_HOST_CHECKED_LIB_DIR)/libvpr.a
+VPR_HOST_RELEASE_LIB?=$(VPR_HOST_RELEASE_LIB_DIR)/libvpr.a
+VPR_CORTEXMSOFT_RELEASE_LIB?=$(VPR_CORTEXMSOFT_RELEASE_LIB_DIR)/libvpr.a
+VPR_CORTEXMHARD_RELEASE_LIB?=$(VPR_CORTEXMHARD_RELEASE_LIB_DIR)/libvpr.a
 VPR_HOST_CHECKED_LINK?=-L $(VPR_HOST_CHECKED_LIB_DIR) -lvpr
 VPR_HOST_RELEASE_LINK?=-L $(VPR_HOST_RELEASE_LIB_DIR) -lvpr
 
@@ -17,6 +23,16 @@ VCCRYPT_INCLUDE_PATH?=$(VCCRYPT_DIR)/include
 VCCRYPT_CFLAGS=-I $(VCCRYPT_INCLUDE_PATH)
 VCCRYPT_HOST_CHECKED_LIB_DIR?=$(VCCRYPT_DIR)/build/host/checked
 VCCRYPT_HOST_RELEASE_LIB_DIR?=$(VCCRYPT_DIR)/build/host/release
+VCCRYPT_CORTEXMSOFT_RELEASE_LIB_DIR?=\
+    $(VCCRYPT_DIR)/build/cortex-m4-softfp/release
+VCCRYPT_CORTEXMHARD_RELEASE_LIB_DIR?=\
+    $(VCCRYPT_DIR)/build/cortex-m4-hardfp/release
+VCCRYPT_HOST_CHECKED_LIB?=$(VCCRYPT_HOST_CHECKED_LIB_DIR)/libvccrypt.a
+VCCRYPT_HOST_RELEASE_LIB?=$(VCCRYPT_HOST_RELEASE_LIB_DIR)/libvccrypt.a
+VCCRYPT_CORTEXMSOFT_RELEASE_LIB?=\
+    $(VCCRYPT_CORTEXMSOFT_RELEASE_LIB_DIR)/libvccrypt.a
+VCCRYPT_CORTEXMHARD_RELEASE_LIB?=\
+    $(VCCRYPT_CORTEXMHARD_RELEASE_LIB_DIR)/libvccrypt.a
 VCCRYPT_HOST_CHECKED_LINK?=-L $(VCCRYPT_HOST_CHECKED_LIB_DIR) -lvccrypt
 VCCRYPT_HOST_RELEASE_LINK?=-L $(VCCRYPT_HOST_RELEASE_LIB_DIR) -lvccrypt
 
@@ -26,8 +42,27 @@ VCCERT_INCLUDE_PATH?=$(VCCERT_DIR)/include
 VCCERT_CFLAGS=-I $(VCCERT_INCLUDE_PATH)
 VCCERT_HOST_CHECKED_LIB_DIR?=$(VCCERT_DIR)/build/host/checked
 VCCERT_HOST_RELEASE_LIB_DIR?=$(VCCERT_DIR)/build/host/release
+VCCERT_CORTEXMSOFT_RELEASE_LIB_DIR?=$(VCCERT_DIR)/build/cortex-m4-softfp/release
+VCCERT_CORTEXMHARD_RELEASE_LIB_DIR?=$(VCCERT_DIR)/build/cortex-m4-hardfp/release
+VCCERT_HOST_CHECKED_LIB?=$(VCCERT_HOST_CHECKED_LIB_DIR)/libvccert.a
+VCCERT_HOST_RELEASE_LIB?=$(VCCERT_HOST_RELEASE_LIB_DIR)/libvccert.a
+VCCERT_CORTEXMSOFT_RELEASE_LIB?=\
+    $(VCCERT_CORTEXMSOFT_RELEASE_LIB_DIR)/libvccert.a
+VCCERT_CORTEXMHARD_RELEASE_LIB?=\
+    $(VCCERT_CORTEXMHARD_RELEASE_LIB_DIR)/libvccert.a
 VCCERT_HOST_CHECKED_LINK?=-L $(VCCERT_HOST_CHECKED_LIB_DIR) -lvccert
 VCCERT_HOST_RELEASE_LINK?=-L $(VCCERT_HOST_RELEASE_LIB_DIR) -lvccert
+
+#vcdb options
+VCDB_DIR?=$(CURDIR)/lib/vcdb
+VCDB_INCLUDE_PATH?=$(VCDB_DIR)/include
+VCDB_CFLAGS=-I $(VCDB_INCLUDE_PATH)
+VCDB_HOST_CHECKED_LIB_DIR?=$(VCDB_DIR)/build/host/checked
+VCDB_HOST_RELEASE_LIB_DIR?=$(VCDB_DIR)/build/host/release
+VCDB_HOST_CHECKED_LIB?=$(VCDB_HOST_CHECKED_LIB_DIR)/libvcdb.a
+VCDB_HOST_RELEASE_LIB?=$(VCDB_HOST_RELEASE_LIB_DIR)/libvcdb.a
+VCDB_HOST_CHECKED_LINK?=-L $(VCDB_HOST_CHECKED_LIB_DIR) -lvcdb
+VCDB_HOST_RELEASE_LINK?=-L $(VCDB_HOST_RELEASE_LIB_DIR) -lvcdb
 
 #model check options
 MODEL_CHECK_DIR?=$(CURDIR)/lib/vcmodel
@@ -134,16 +169,29 @@ CORTEXMHARD_RELEASE_CXXFLAGS=-std=gnu++14 $(COMMON_CXXFLAGS) -O2 \
 .PHONY: build.lib.vpr build.lib.vccrypt build.lib.vccert build.lib.vcdb
 .PHONY: test.lib.vpr test.lib.vccrypt test.lib.vccert test.lib.vcdb
 .PHONY: clean.lib.vpr clean.lib.vccrypt clean.lib.vccert clean.lib.vcdb
+.PHONY: extract.lib
+.PHONY: extract.lib.vpr extract.lib.vccrypt extract.lib.vccert extract.lib.vcdb
 
 #main build target
 ALL: host.lib.checked host.lib.release cortexmsoft.lib.release
 ALL: cortexmhard.lib.release
 
 libdepends: build.lib.vpr build.lib.vccrypt build.lib.vccert build.lib.vcdb
+build.lib.vccrypt: build.lib.vpr
+build.lib.vccert: build.lib.vccrypt
+build.lib.vcdb: build.lib.vpr
 test.libdepends: libdepends
 test.libdepends: test.lib.vpr test.lib.vccrypt test.lib.vccert test.lib.vcdb
+test.lib.vpr: build.lib.vpr
+test.lib.vccrypt: build.lib.vpr build.lib.vccrypt
+test.lib.vccert: build.lib.vpr build.lib.vccrypt build.lib.vccert
+test.lib.vcdb: build.lib.vpr build.lib.vcdb
 clean.libdepends: clean.lib.vpr clean.lib.vccrypt clean.lib.vccert
 clean.libdepends: clean.lib.vcdb
+
+extract.lib: libdepends
+extract.lib: extract.lib.vpr extract.lib.vccrypt extract.lib.vccert
+extract.lib: extract.lib.vcdb
 
 build.lib.vpr:
 	(cd lib/vpr && $(MAKE))
@@ -200,24 +248,38 @@ $(CORTEXMSOFT_RELEASE_DIRS) $(CORTEXMHARD_RELEASE_DIRS):
 	mkdir -p $@
 
 #Checked library (used for testing)
-$(HOST_CHECKED_LIB) : libdepends
+$(HOST_CHECKED_LIB) : libdepends extract.lib
 $(HOST_CHECKED_LIB) : $(HOST_CHECKED_OBJECTS)
-	$(AR) rcs $@ $(HOST_CHECKED_OBJECTS)
+	$(AR) rcs $@ $(HOST_CHECKED_OBJECTS) \
+		$(dir $(HOST_CHECKED_LIB))/libdepends/vpr/*.o \
+		$(dir $(HOST_CHECKED_LIB))/libdepends/vccrypt/*.o \
+		$(dir $(HOST_CHECKED_LIB))/libdepends/vccert/*.o \
+		$(dir $(HOST_CHECKED_LIB))/libdepends/vcdb/*.o
 
 #Host release library
-$(HOST_RELEASE_LIB) : libdepends
+$(HOST_RELEASE_LIB) : libdepends extract.lib
 $(HOST_RELEASE_LIB) : $(HOST_RELEASE_OBJECTS)
-	$(AR) rcs $@ $(HOST_RELEASE_OBJECTS)
+	$(AR) rcs $@ $(HOST_RELEASE_OBJECTS) \
+		$(dir $(HOST_RELEASE_LIB))/libdepends/vpr/*.o \
+		$(dir $(HOST_RELEASE_LIB))/libdepends/vccrypt/*.o \
+		$(dir $(HOST_RELEASE_LIB))/libdepends/vccert/*.o \
+		$(dir $(HOST_RELEASE_LIB))/libdepends/vcdb/*.o
 
 #Cortex-M4 softfp library
-$(CORTEXMSOFT_RELEASE_LIB) : libdepends
+$(CORTEXMSOFT_RELEASE_LIB) : libdepends extract.lib
 $(CORTEXMSOFT_RELEASE_LIB) : $(CORTEXMSOFT_RELEASE_OBJECTS)
-	$(CORTEXMSOFT_RELEASE_AR) rcs $@ $(CORTEXMSOFT_RELEASE_OBJECTS)
+	$(CORTEXMSOFT_RELEASE_AR) rcs $@ $(CORTEXMSOFT_RELEASE_OBJECTS) \
+		$(dir $(CORTEXMSOFT_RELEASE_LIB))/libdepends/vpr/*.o \
+		$(dir $(CORTEXMSOFT_RELEASE_LIB))/libdepends/vccrypt/*.o \
+		$(dir $(CORTEXMSOFT_RELEASE_LIB))/libdepends/vccert/*.o
 
 #Cortex-M4 hardfp library
-$(CORTEXMHARD_RELEASE_LIB) : libdepends
+$(CORTEXMHARD_RELEASE_LIB) : libdepends extract.lib
 $(CORTEXMHARD_RELEASE_LIB) : $(CORTEXMHARD_RELEASE_OBJECTS)
-	$(CORTEXMHARD_RELEASE_AR) rcs $@ $(CORTEXMHARD_RELEASE_OBJECTS)
+	$(CORTEXMHARD_RELEASE_AR) rcs $@ $(CORTEXMHARD_RELEASE_OBJECTS) \
+		$(dir $(CORTEXMHARD_RELEASE_LIB))/libdepends/vpr/*.o \
+		$(dir $(CORTEXMHARD_RELEASE_LIB))/libdepends/vccrypt/*.o \
+		$(dir $(CORTEXMHARD_RELEASE_LIB))/libdepends/vccert/*.o
 
 #Google Test object
 $(GTEST_OBJ): $(GTEST_DIR)/src/gtest-all.cc
@@ -255,6 +317,7 @@ test: test.libdepends $(TEST_DIRS) host.lib.checked $(TESTLIBVCBLOCKCHAIN)
 clean: clean.libdepends
 	rm -rf $(BUILD_DIR)
 
+$(TESTLIBVCBLOCKCHAIN): libdepends
 $(TESTLIBVCBLOCKCHAIN): $(HOST_CHECKED_OBJECTS) $(TEST_OBJECTS) $(GTEST_OBJ)
 	find $(TEST_BUILD_DIR) -name "*.gcda" -exec rm {} \; -print
 	rm -f gtest-all.gcda
@@ -263,3 +326,57 @@ $(TESTLIBVCBLOCKCHAIN): $(HOST_CHECKED_OBJECTS) $(TEST_OBJECTS) $(GTEST_OBJ)
 	    $(HOST_CHECKED_OBJECTS) $(GTEST_OBJ) -lpthread \
 	    -L $(TOOLCHAIN_DIR)/host/lib64 -lstdc++ \
 	    $(VCCRYPT_HOST_RELEASE_LINK) $(VPR_HOST_RELEASE_LINK)
+
+extract.lib.vpr: libdepends
+extract.lib.vpr:
+	mkdir -p $(dir $(HOST_CHECKED_LIB))/libdepends/vpr
+	(cd $(dir $(HOST_CHECKED_LIB))/libdepends/vpr \
+	    && $(HOST_CHECKED_AR) -x $(VPR_HOST_CHECKED_LIB))
+	mkdir -p $(dir $(HOST_RELEASE_LIB))/libdepends/vpr
+	(cd $(dir $(HOST_RELEASE_LIB))/libdepends/vpr \
+	    && $(HOST_RELEASE_AR) -x $(VPR_HOST_RELEASE_LIB))
+	mkdir -p $(dir $(CORTEXMSOFT_RELEASE_LIB))/libdepends/vpr
+	(cd $(dir $(CORTEXMSOFT_RELEASE_LIB))/libdepends/vpr \
+	    && $(CORTEXMSOFT_RELEASE_AR) -x $(VPR_CORTEXMSOFT_RELEASE_LIB))
+	mkdir -p $(dir $(CORTEXMHARD_RELEASE_LIB))/libdepends/vpr
+	(cd $(dir $(CORTEXMHARD_RELEASE_LIB))/libdepends/vpr \
+	    && $(CORTEXMHARD_RELEASE_AR) -x $(VPR_CORTEXMHARD_RELEASE_LIB))
+
+extract.lib.vccrypt: libdepends
+extract.lib.vccrypt:
+	mkdir -p $(dir $(HOST_CHECKED_LIB))/libdepends/vccrypt
+	(cd $(dir $(HOST_CHECKED_LIB))/libdepends/vccrypt \
+	    && $(HOST_CHECKED_AR) -x $(VCCRYPT_HOST_CHECKED_LIB))
+	mkdir -p $(dir $(HOST_RELEASE_LIB))/libdepends/vccrypt
+	(cd $(dir $(HOST_RELEASE_LIB))/libdepends/vccrypt \
+	    && $(HOST_RELEASE_AR) -x $(VCCRYPT_HOST_RELEASE_LIB))
+	mkdir -p $(dir $(CORTEXMSOFT_RELEASE_LIB))/libdepends/vccrypt
+	(cd $(dir $(CORTEXMSOFT_RELEASE_LIB))/libdepends/vccrypt \
+	    && $(CORTEXMSOFT_RELEASE_AR) -x $(VCCRYPT_CORTEXMSOFT_RELEASE_LIB))
+	mkdir -p $(dir $(CORTEXMHARD_RELEASE_LIB))/libdepends/vccrypt
+	(cd $(dir $(CORTEXMHARD_RELEASE_LIB))/libdepends/vccrypt \
+	    && $(CORTEXMHARD_RELEASE_AR) -x $(VCCRYPT_CORTEXMHARD_RELEASE_LIB))
+
+extract.lib.vccert: libdepends
+extract.lib.vccert:
+	mkdir -p $(dir $(HOST_CHECKED_LIB))/libdepends/vccert
+	(cd $(dir $(HOST_CHECKED_LIB))/libdepends/vccert \
+	    && $(HOST_CHECKED_AR) -x $(VCCERT_HOST_CHECKED_LIB))
+	mkdir -p $(dir $(HOST_RELEASE_LIB))/libdepends/vccert
+	(cd $(dir $(HOST_RELEASE_LIB))/libdepends/vccert \
+	    && $(HOST_RELEASE_AR) -x $(VCCERT_HOST_RELEASE_LIB))
+	mkdir -p $(dir $(CORTEXMSOFT_RELEASE_LIB))/libdepends/vccert
+	(cd $(dir $(CORTEXMSOFT_RELEASE_LIB))/libdepends/vccert \
+	    && $(CORTEXMSOFT_RELEASE_AR) -x $(VCCERT_CORTEXMSOFT_RELEASE_LIB))
+	mkdir -p $(dir $(CORTEXMHARD_RELEASE_LIB))/libdepends/vccert
+	(cd $(dir $(CORTEXMHARD_RELEASE_LIB))/libdepends/vccert \
+	    && $(CORTEXMHARD_RELEASE_AR) -x $(VCCERT_CORTEXMHARD_RELEASE_LIB))
+
+extract.lib.vcdb: libdepends
+extract.lib.vcdb:
+	mkdir -p $(dir $(HOST_CHECKED_LIB))/libdepends/vcdb
+	(cd $(dir $(HOST_CHECKED_LIB))/libdepends/vcdb \
+	    && $(HOST_CHECKED_AR) -x $(VCDB_HOST_CHECKED_LIB))
+	mkdir -p $(dir $(HOST_RELEASE_LIB))/libdepends/vcdb
+	(cd $(dir $(HOST_RELEASE_LIB))/libdepends/vcdb \
+	    && $(HOST_RELEASE_AR) -x $(VCDB_HOST_RELEASE_LIB))

@@ -140,6 +140,7 @@ ALL: host.lib.checked host.lib.release cortexmsoft.lib.release
 ALL: cortexmhard.lib.release
 
 libdepends: build.lib.vpr build.lib.vccrypt build.lib.vccert build.lib.vcdb
+test.libdepends: libdepends
 test.libdepends: test.lib.vpr test.lib.vccrypt test.lib.vccert test.lib.vcdb
 clean.libdepends: clean.lib.vpr clean.lib.vccrypt clean.lib.vccert
 clean.libdepends: clean.lib.vcdb
@@ -185,9 +186,11 @@ host.lib.checked: libdepends $(HOST_CHECKED_DIRS) $(HOST_CHECKED_LIB)
 host.lib.release: libdepends $(HOST_RELEASE_DIRS) $(HOST_RELEASE_LIB)
 
 #cortex M4 soft floating point targets
+cortexmsoft.lib.release: libdepends
 cortexmsoft.lib.release: $(CORTEXMSOFT_RELEASE_DIRS) $(CORTEXMSOFT_RELEASE_LIB)
 
 #cortex M4F hard floating point targets
+cortexmhard.lib.release: libdepends
 cortexmhard.lib.release: $(CORTEXMHARD_RELEASE_DIRS) $(CORTEXMHARD_RELEASE_LIB)
 
 #build missing directories
@@ -197,18 +200,22 @@ $(CORTEXMSOFT_RELEASE_DIRS) $(CORTEXMHARD_RELEASE_DIRS):
 	mkdir -p $@
 
 #Checked library (used for testing)
+$(HOST_CHECKED_LIB) : libdepends
 $(HOST_CHECKED_LIB) : $(HOST_CHECKED_OBJECTS)
 	$(AR) rcs $@ $(HOST_CHECKED_OBJECTS)
 
 #Host release library
+$(HOST_RELEASE_LIB) : libdepends
 $(HOST_RELEASE_LIB) : $(HOST_RELEASE_OBJECTS)
 	$(AR) rcs $@ $(HOST_RELEASE_OBJECTS)
 
 #Cortex-M4 softfp library
+$(CORTEXMSOFT_RELEASE_LIB) : libdepends
 $(CORTEXMSOFT_RELEASE_LIB) : $(CORTEXMSOFT_RELEASE_OBJECTS)
 	$(CORTEXMSOFT_RELEASE_AR) rcs $@ $(CORTEXMSOFT_RELEASE_OBJECTS)
 
 #Cortex-M4 hardfp library
+$(CORTEXMHARD_RELEASE_LIB) : libdepends
 $(CORTEXMHARD_RELEASE_LIB) : $(CORTEXMHARD_RELEASE_OBJECTS)
 	$(CORTEXMHARD_RELEASE_AR) rcs $@ $(CORTEXMHARD_RELEASE_OBJECTS)
 

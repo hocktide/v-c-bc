@@ -13,3 +13,6 @@
 [submodule "lib/vcdb"]
 	path = lib/vcdb
 	url = git@github.com:VeloPayments/vcdb
+[submodule "lib/vcmodel"]
+	path = lib/vcmodel
+	url = git@github.com:VeloPayments/vcmodel

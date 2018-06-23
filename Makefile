@@ -114,7 +114,7 @@ HOST_RELEASE_OBJECTS= \
     $(patsubst %.c,$(HOST_RELEASE_BUILD_DIR)/%.o,$(STRIPPED_SOURCES))
 
 #Dependencies
-GTEST_DIR?=../googletest/googletest
+GTEST_DIR?=$(PWD)/lib/googletest/googletest
 GTEST_OBJ=$(TEST_BUILD_DIR)/gtest-all.o
 
 #Toolchain location

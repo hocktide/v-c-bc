@@ -16,3 +16,6 @@
 [submodule "lib/vcmodel"]
 	path = lib/vcmodel
 	url = git@github.com:VeloPayments/vcmodel
+[submodule "lib/lmdb"]
+	path = lib/lmdb
+	url = git@github.com:VeloPayments/lmdb

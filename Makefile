@@ -64,6 +64,14 @@ VCDB_HOST_RELEASE_LIB?=$(VCDB_HOST_RELEASE_LIB_DIR)/libvcdb.a
 VCDB_HOST_CHECKED_LINK?=-L $(VCDB_HOST_CHECKED_LIB_DIR) -lvcdb
 VCDB_HOST_RELEASE_LINK?=-L $(VCDB_HOST_RELEASE_LIB_DIR) -lvcdb
 
+#lmdb options
+LMDB_DIR?=$(CURDIR)/lib/lmdb
+LMDB_INCLUDE_PATH=$(LMDB_DIR)
+LMDB_CFLAGS=-I $(LMDB_INCLUDE_PATH)
+LMDB_HOST_RELEASE_LIB_DIR?=$(LMDB_DIR)
+LMDB_HOST_RELEASE_LIB?=$(LMDB_HOST_RELEASE_LIB_DIR)/liblmdb.a
+LMDB_HOST_RELEASE_LINK?=-L $(LMDB_HOST_RELEASE_LIB_DIR) -llmdb
+
 #model check options
 MODEL_CHECK_DIR?=$(CURDIR)/lib/vcmodel
 include $(MODEL_CHECK_DIR)/model_check.mk
@@ -167,7 +175,9 @@ CORTEXMHARD_RELEASE_CXXFLAGS=-std=gnu++14 $(COMMON_CXXFLAGS) -O2 \
 .PHONY: ALL clean test host.lib.checked host.lib.release cortexmsoft.lib.release
 .PHONY: cortexmhard.lib.release libdepends test.libdepends clean.libdepends
 .PHONY: build.lib.vpr build.lib.vccrypt build.lib.vccert build.lib.vcdb
+.PHONY: build.lib.lmdb
 .PHONY: test.lib.vpr test.lib.vccrypt test.lib.vccert test.lib.vcdb
+.PHONY: test.lib.lmdb
 .PHONY: clean.lib.vpr clean.lib.vccrypt clean.lib.vccert clean.lib.vcdb
 .PHONY: extract.lib
 .PHONY: extract.lib.vpr extract.lib.vccrypt extract.lib.vccert extract.lib.vcdb
@@ -177,21 +187,24 @@ ALL: host.lib.checked host.lib.release cortexmsoft.lib.release
 ALL: cortexmhard.lib.release
 
 libdepends: build.lib.vpr build.lib.vccrypt build.lib.vccert build.lib.vcdb
+libdepends: build.lib.lmdb
 build.lib.vccrypt: build.lib.vpr
 build.lib.vccert: build.lib.vccrypt
 build.lib.vcdb: build.lib.vpr
 test.libdepends: libdepends
 test.libdepends: test.lib.vpr test.lib.vccrypt test.lib.vccert test.lib.vcdb
+test.libdepends: test.lib.lmdb
 test.lib.vpr: build.lib.vpr
 test.lib.vccrypt: build.lib.vpr build.lib.vccrypt
 test.lib.vccert: build.lib.vpr build.lib.vccrypt build.lib.vccert
 test.lib.vcdb: build.lib.vpr build.lib.vcdb
+test.lib.lmdb: build.lib.lmdb
 clean.libdepends: clean.lib.vpr clean.lib.vccrypt clean.lib.vccert
-clean.libdepends: clean.lib.vcdb
+clean.libdepends: clean.lib.vcdb clean.lib.lmdb
 
 extract.lib: libdepends
 extract.lib: extract.lib.vpr extract.lib.vccrypt extract.lib.vccert
-extract.lib: extract.lib.vcdb
+extract.lib: extract.lib.vcdb extract.lib.lmdb
 
 build.lib.vpr:
 	(cd lib/vpr && $(MAKE))
@@ -205,6 +218,9 @@ build.lib.vccert:
 build.lib.vcdb:
 	(cd lib/vcdb && $(MAKE))
 
+build.lib.lmdb:
+	(cd lib/lmdb && $(MAKE))
+
 test.lib.vpr:
 	(cd lib/vpr && $(MAKE) test)
 
@@ -217,6 +233,9 @@ test.lib.vccert:
 test.lib.vcdb:
 	(cd lib/vcdb && $(MAKE) test)
 
+test.lib.lmdb:
+	(cd lib/lmdb && $(MAKE) test)
+
 clean.lib.vpr:
 	(cd lib/vpr && $(MAKE) clean)
 
@@ -228,6 +247,9 @@ clean.lib.vccert:
 
 clean.lib.vcdb:
 	(cd lib/vcdb && $(MAKE) clean)
+
+clean.lib.lmdb:
+	(cd lib/lmdb && $(MAKE) clean)
 
 #host targets
 host.lib.checked: libdepends $(HOST_CHECKED_DIRS) $(HOST_CHECKED_LIB)
@@ -254,7 +276,8 @@ $(HOST_CHECKED_LIB) : $(HOST_CHECKED_OBJECTS)
 		$(dir $(HOST_CHECKED_LIB))/libdepends/vpr/*.o \
 		$(dir $(HOST_CHECKED_LIB))/libdepends/vccrypt/*.o \
 		$(dir $(HOST_CHECKED_LIB))/libdepends/vccert/*.o \
-		$(dir $(HOST_CHECKED_LIB))/libdepends/vcdb/*.o
+		$(dir $(HOST_CHECKED_LIB))/libdepends/vcdb/*.o \
+		$(dir $(HOST_CHECKED_LIB))/libdepends/lmdb/*.o
 
 #Host release library
 $(HOST_RELEASE_LIB) : libdepends extract.lib
@@ -263,7 +286,8 @@ $(HOST_RELEASE_LIB) : $(HOST_RELEASE_OBJECTS)
 		$(dir $(HOST_RELEASE_LIB))/libdepends/vpr/*.o \
 		$(dir $(HOST_RELEASE_LIB))/libdepends/vccrypt/*.o \
 		$(dir $(HOST_RELEASE_LIB))/libdepends/vccert/*.o \
-		$(dir $(HOST_RELEASE_LIB))/libdepends/vcdb/*.o
+		$(dir $(HOST_RELEASE_LIB))/libdepends/vcdb/*.o \
+		$(dir $(HOST_RELEASE_LIB))/libdepends/lmdb/*.o
 
 #Cortex-M4 softfp library
 $(CORTEXMSOFT_RELEASE_LIB) : libdepends extract.lib
@@ -380,3 +404,12 @@ extract.lib.vcdb:
 	mkdir -p $(dir $(HOST_RELEASE_LIB))/libdepends/vcdb
 	(cd $(dir $(HOST_RELEASE_LIB))/libdepends/vcdb \
 	    && $(HOST_RELEASE_AR) -x $(VCDB_HOST_RELEASE_LIB))
+
+extract.lib.lmdb: libdepends
+extract.lib.lmdb:
+	mkdir -p $(dir $(HOST_CHECKED_LIB))/libdepends/lmdb
+	(cd $(dir $(HOST_CHECKED_LIB))/libdepends/lmdb \
+	    && $(HOST_CHECKED_AR) -x $(LMDB_HOST_RELEASE_LIB))
+	mkdir -p $(dir $(HOST_RELEASE_LIB))/libdepends/lmdb
+	(cd $(dir $(HOST_RELEASE_LIB))/libdepends/lmdb \
+	    && $(HOST_RELEASE_AR) -x $(LMDB_HOST_RELEASE_LIB))

@@ -269,7 +269,7 @@ clean.lib.vcdb:
 clean.lib.lmdb:
 	(cd lib/lmdb && $(MAKE) clean)
 
-clean.lib.libevent:
+clean.lib.libevent: $(LIBEVENT_DIR)/Makefile
 	(cd $(LIBEVENT_DIR) && $(MAKE) clean)
 
 #host targets

@@ -72,6 +72,14 @@ LMDB_HOST_RELEASE_LIB_DIR?=$(LMDB_DIR)
 LMDB_HOST_RELEASE_LIB?=$(LMDB_HOST_RELEASE_LIB_DIR)/liblmdb.a
 LMDB_HOST_RELEASE_LINK?=-L $(LMDB_HOST_RELEASE_LIB_DIR) -llmdb
 
+#libevent options
+LIBEVENT_DIR?=$(CURDIR)/lib/libevent
+LIBEVENT_INCLUDE_PATH=$(LIBEVENT_DIR)
+LIBEVENT_CFLAGS=-I $(LIBEVENT_INCLUDE_PATH)
+LIBEVENT_HOST_RELEASE_LIB_DIR?=$(LIBEVENT_DIR)/.libs
+LIBEVENT_HOST_RELEASE_LIB?=$(LIBEVENT_HOST_RELEASE_LIB_DIR)/libevent.a
+LIBEVENT_HOST_RELEASE_LINK?=-L $(LIBEVENT_HOST_RELEASE_LIB_DIR) -levent
+
 #model check options
 MODEL_CHECK_DIR?=$(CURDIR)/lib/vcmodel
 include $(MODEL_CHECK_DIR)/model_check.mk
@@ -187,7 +195,7 @@ ALL: host.lib.checked host.lib.release cortexmsoft.lib.release
 ALL: cortexmhard.lib.release
 
 libdepends: build.lib.vpr build.lib.vccrypt build.lib.vccert build.lib.vcdb
-libdepends: build.lib.lmdb
+libdepends: build.lib.lmdb build.lib.libevent
 build.lib.vccrypt: build.lib.vpr
 build.lib.vccert: build.lib.vccrypt
 build.lib.vcdb: build.lib.vpr
@@ -199,12 +207,16 @@ test.lib.vccrypt: build.lib.vpr build.lib.vccrypt
 test.lib.vccert: build.lib.vpr build.lib.vccrypt build.lib.vccert
 test.lib.vcdb: build.lib.vpr build.lib.vcdb
 test.lib.lmdb: build.lib.lmdb
+test.lib.libevent: build.lib.libevent
 clean.libdepends: clean.lib.vpr clean.lib.vccrypt clean.lib.vccert
-clean.libdepends: clean.lib.vcdb clean.lib.lmdb
+clean.libdepends: clean.lib.vcdb clean.lib.lmdb clean.lib.libevent
 
 extract.lib: libdepends
 extract.lib: extract.lib.vpr extract.lib.vccrypt extract.lib.vccert
-extract.lib: extract.lib.vcdb extract.lib.lmdb
+extract.lib: extract.lib.vcdb extract.lib.lmdb extract.lib.libevent
+
+$(LIBEVENT_DIR)/Makefile:
+	(cd $(LIBEVENT_DIR) && ./configure --disable-libevent-install)
 
 build.lib.vpr:
 	(cd lib/vpr && $(MAKE))
@@ -221,6 +233,9 @@ build.lib.vcdb:
 build.lib.lmdb:
 	(cd lib/lmdb && $(MAKE))
 
+build.lib.libevent: $(LIBEVENT_DIR)/Makefile
+	(cd $(LIBEVENT_DIR) && $(MAKE))
+
 test.lib.vpr:
 	(cd lib/vpr && $(MAKE) test)
 
@@ -236,6 +251,9 @@ test.lib.vcdb:
 test.lib.lmdb:
 	(cd lib/lmdb && $(MAKE) test)
 
+test.lib.libevent:
+	(cd $(LIBEVENT_DIR) && $(MAKE) test)
+
 clean.lib.vpr:
 	(cd lib/vpr && $(MAKE) clean)
 
@@ -250,6 +268,9 @@ clean.lib.vcdb:
 
 clean.lib.lmdb:
 	(cd lib/lmdb && $(MAKE) clean)
+
+clean.lib.libevent:
+	(cd $(LIBEVENT_DIR) && $(MAKE) clean)
 
 #host targets
 host.lib.checked: libdepends $(HOST_CHECKED_DIRS) $(HOST_CHECKED_LIB)
@@ -277,7 +298,8 @@ $(HOST_CHECKED_LIB) : $(HOST_CHECKED_OBJECTS)
 		$(dir $(HOST_CHECKED_LIB))/libdepends/vccrypt/*.o \
 		$(dir $(HOST_CHECKED_LIB))/libdepends/vccert/*.o \
 		$(dir $(HOST_CHECKED_LIB))/libdepends/vcdb/*.o \
-		$(dir $(HOST_CHECKED_LIB))/libdepends/lmdb/*.o
+		$(dir $(HOST_CHECKED_LIB))/libdepends/lmdb/*.o \
+		$(dir $(HOST_CHECKED_LIB))/libdepends/libevent/*.o
 
 #Host release library
 $(HOST_RELEASE_LIB) : libdepends extract.lib
@@ -287,7 +309,8 @@ $(HOST_RELEASE_LIB) : $(HOST_RELEASE_OBJECTS)
 		$(dir $(HOST_RELEASE_LIB))/libdepends/vccrypt/*.o \
 		$(dir $(HOST_RELEASE_LIB))/libdepends/vccert/*.o \
 		$(dir $(HOST_RELEASE_LIB))/libdepends/vcdb/*.o \
-		$(dir $(HOST_RELEASE_LIB))/libdepends/lmdb/*.o
+		$(dir $(HOST_RELEASE_LIB))/libdepends/lmdb/*.o \
+		$(dir $(HOST_RELEASE_LIB))/libdepends/libevent/*.o
 
 #Cortex-M4 softfp library
 $(CORTEXMSOFT_RELEASE_LIB) : libdepends extract.lib
@@ -413,3 +436,12 @@ extract.lib.lmdb:
 	mkdir -p $(dir $(HOST_RELEASE_LIB))/libdepends/lmdb
 	(cd $(dir $(HOST_RELEASE_LIB))/libdepends/lmdb \
 	    && $(HOST_RELEASE_AR) -x $(LMDB_HOST_RELEASE_LIB))
+
+extract.lib.libevent: libdepends
+extract.lib.libevent:
+	mkdir -p $(dir $(HOST_CHECKED_LIB))/libdepends/libevent
+	(cd $(dir $(HOST_CHECKED_LIB))/libdepends/libevent \
+	    && $(HOST_CHECKED_AR) -x $(LIBEVENT_HOST_RELEASE_LIB))
+	mkdir -p $(dir $(HOST_RELEASE_LIB))/libdepends/libevent
+	(cd $(dir $(HOST_RELEASE_LIB))/libdepends/libevent \
+	    && $(HOST_RELEASE_AR) -x $(LIBEVENT_HOST_RELEASE_LIB))

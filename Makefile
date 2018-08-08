@@ -216,7 +216,8 @@ extract.lib: extract.lib.vpr extract.lib.vccrypt extract.lib.vccert
 extract.lib: extract.lib.vcdb extract.lib.lmdb extract.lib.libevent
 
 $(LIBEVENT_DIR)/Makefile:
-	(cd $(LIBEVENT_DIR) && ./configure --disable-libevent-install)
+	(cd $(LIBEVENT_DIR) && \
+	    ./configure --disable-libevent-install --disable-openssl)
 
 build.lib.vpr:
 	(cd lib/vpr && $(MAKE))

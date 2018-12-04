@@ -19,3 +19,6 @@
 [submodule "lib/lmdb"]
 	path = lib/lmdb
 	url = git@github.com:VeloPayments/lmdb
+[submodule "lib/libevent"]
+	path = lib/libevent
+	url = git@github.com:VeloPayments/libevent

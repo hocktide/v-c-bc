@@ -232,7 +232,8 @@ build.lib.vcdb:
 	(cd lib/vcdb && $(MAKE))
 
 build.lib.lmdb:
-	(cd lib/lmdb && $(MAKE))
+	(cd lib/lmdb && CC=$(HOST_RELEASE_CC) AR=$(HOST_RELEASE_AR) $(MAKE))
+	
 
 build.lib.libevent: $(LIBEVENT_DIR)/Makefile
 	(cd $(LIBEVENT_DIR) && $(MAKE))

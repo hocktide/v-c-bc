@@ -1,5 +1,5 @@
 project('vcblockchain', 'c', 'cpp',
-  default_options : ['c_std=c11', 'cpp_std=c++14'],
+  default_options : ['c_std=gnu11', 'cpp_std=c++14'],
   meson_version : '>=0.49.0'
 )
 
@@ -102,24 +102,25 @@ objects = [
 ]
 
 vcblockchain_lib = static_library('vcblockchain', src,
-	dependencies : [vcmodel, vpr, vcdb, lmdb, libevent, vccert, vccrypt],
-	objects : objects
+  dependencies : [vcmodel, vpr, vcdb, lmdb, libevent, vccert, vccrypt],
+  objects : objects
 )
 
 vcblockchain_test = executable('testvcblockchain', test_src,
-	dependencies : [gtest, vpr, vccert, vcdb, vccrypt, lmdb, libevent],
-	link_with : vcblockchain_lib
+  dependencies : [gtest, vpr, vccert, vcdb, vccrypt, lmdb, libevent],
+  link_with : vcblockchain_lib
 )
+
+test('testvcblockchain', vcblockchain_test)
 
 vcblockchain_dep = declare_dependency(
-	link_with : vcblockchain_lib,
-	include_directories : [
-		vpr_include,
-		vccert_include,
-		vccrypt_include,
-		vcdb_include,
-		event_include,
-		lmdb_include
-	]
+  link_with : vcblockchain_lib,
+  include_directories : [
+	vpr_include,
+	vccert_include,
+	vccrypt_include,
+	vcdb_include,
+	event_include,
+    lmdb_include
+  ]
 )
-

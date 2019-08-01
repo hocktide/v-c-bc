@@ -1,1 +1,12 @@
 build
+
+# don't commit source for subprojects
+subprojects/googletest
+subprojects/libevent
+subprojects/lmdb
+subprojects/vccert
+subprojects/vccrypt
+subprojects/vcdb
+subprojects/vcmodel
+subprojects/vpr
+

@@ -94,6 +94,8 @@ event_sub = subproject('libevent')
 event_include = event_sub.get_variable('event_include')
 event_lib = event_sub.get_variable('event_lib')
 
+vcblockchain_include = include_directories('include')
+
 objects = [
   vpr_lib.extract_all_objects(),
   vccert_lib.extract_all_objects(),
@@ -104,11 +106,13 @@ objects = [
 ]
 
 vcblockchain_lib = static_library('vcblockchain', src,
+  include_directories : vcblockchain_include,
   dependencies : [vcmodel, vpr, vcdb, lmdb, libevent, vccert, vccrypt],
   objects : objects
 )
 
 vcblockchain_test = executable('testvcblockchain', test_src,
+  include_directories : vcblockchain_include,
   dependencies : [gtest, vpr, vccert, vcdb, vccrypt, lmdb, libevent],
   link_with : vcblockchain_lib
 )
@@ -123,6 +127,7 @@ vcblockchain_dep = declare_dependency(
 	vccrypt_include,
 	vcdb_include,
 	event_include,
-    lmdb_include
+    lmdb_include,
+    vcblockchain_include
   ]
 )

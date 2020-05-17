@@ -10,3 +10,6 @@ subprojects/vcdb
 subprojects/vcmodel
 subprojects/vpr
 
+#cscope / ctags artifacts
+cscope.*
+tags

@@ -34,14 +34,31 @@ extern "C" {
 #define VCBLOCKCHAIN_ERROR_INVALID_ARG 0x5100
 
 /**
+ * \brief An out-of-memory condition was encountered during this operation.
+ */
+#define VCBLOCKCHAIN_ERROR_OUT_OF_MEMORY 0x5101
+
+/**
  * \brief An error occurred when attempting to read from an ssock instance.
  */
-#define VCBLOCKCHAIN_ERROR_SSOCK_READ 0x5101
+#define VCBLOCKCHAIN_ERROR_SSOCK_READ 0x5102
 
 /**
  * \brief An error occurred when attempting to write to an ssock instance.
  */
-#define VCBLOCKCHAIN_ERROR_SSOCK_WRITE 0x5102
+#define VCBLOCKCHAIN_ERROR_SSOCK_WRITE 0x5103
+
+/**
+ * \brief An invalid data size was encountered when attempting to read a data
+ * packet from the socket.
+ */
+#define VCBLOCKCHAIN_ERROR_SSOCK_READ_UNEXPECTED_DATA_SIZE 0x5104
+
+/**
+ * \brief An invalid packet type was encountered when attempting to read a data
+ * packet from the socket.
+ */
+#define VCBLOCKCHAIN_ERROR_SSOCK_READ_UNEXPECTED_DATA_TYPE 0x5105
 
 /**
  * @}

@@ -20,6 +20,19 @@ extern "C" {
 /* forward decl for ssock. */
 typedef struct ssock ssock;
 
+/* packet types. */
+#define SSOCK_DATA_TYPE_BOM 0x00
+#define SSOCK_DATA_TYPE_UINT8 0x01
+#define SSOCK_DATA_TYPE_UINT32 0x03
+#define SSOCK_DATA_TYPE_UINT64 0x04
+#define SSOCK_DATA_TYPE_INT8 0x09
+#define SSOCK_DATA_TYPE_INT32 0x0A
+#define SSOCK_DATA_TYPE_INT64 0x0B
+#define SSOCK_DATA_TYPE_STRING 0x10
+#define SSOCK_DATA_TYPE_DATA_PACKET 0x20
+#define SSOCK_DATA_TYPE_AUTHED_PACKET 0x30
+#define SSOCK_DATA_TYPE_EOM 0xFF
+
 /**
  * \brief Read method for ssock.
  *

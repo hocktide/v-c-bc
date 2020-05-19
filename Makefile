@@ -189,6 +189,7 @@ CORTEXMHARD_RELEASE_CXXFLAGS=-std=gnu++14 $(COMMON_CXXFLAGS) -O2 \
 .PHONY: clean.lib.vpr clean.lib.vccrypt clean.lib.vccert clean.lib.vcdb
 .PHONY: extract.lib
 .PHONY: extract.lib.vpr extract.lib.vccrypt extract.lib.vccert extract.lib.vcdb
+.PHONY: test.vcblockchain
 
 #main build target
 ALL: host.lib.checked host.lib.release cortexmsoft.lib.release
@@ -360,7 +361,9 @@ $(CORTEXMHARD_RELEASE_BUILD_DIR)/%.o: $(SRCDIR)/%.c
 	mkdir -p $(dir $@)
 	$(CORTEXMHARD_RELEASE_CC) $(CORTEXMHARD_RELEASE_CFLAGS) -c -o $@ $<
 
-test: test.libdepends $(TEST_DIRS) host.lib.checked $(TESTLIBVCBLOCKCHAIN)
+test: test.libdepends test.vcblockchain
+
+test.vcblockchain: $(TEST_DIRS) host.lib.checked $(TESTLIBVCBLOCKCHAIN)
 	LD_LIBRARY_PATH=$(TOOLCHAIN_DIR)/host/lib:$(TOOLCHAIN_DIR)/host/lib64:$(LD_LIBRARY_PATH) $(TESTLIBVCBLOCKCHAIN)
 
 clean: clean.libdepends

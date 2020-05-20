@@ -89,7 +89,7 @@ PWD?=$(CURDIR)
 
 #library source files
 SRCDIR=$(PWD)/src
-DIRS=$(SRCDIR) $(SRCDIR)/ssock
+DIRS=$(SRCDIR) $(SRCDIR)/byteswap $(SRCDIR)/ssock
 SOURCES=$(foreach d,$(DIRS),$(wildcard $(d)/*.c))
 STRIPPED_SOURCES=$(patsubst $(SRCDIR)/%,%,$(SOURCES))
 

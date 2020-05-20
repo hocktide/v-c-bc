@@ -16,6 +16,23 @@
 extern "C" {
 #endif /*__cplusplus*/
 
+/* ARM */
+#if defined(__arm__) || defined(__thumb__)
+#define VCBLOCKCHAIN_LITTLE_ENDIAN
+#endif
+/* ARM64 */
+#if defined(__aarch64__)
+#define VCBLOCKCHAIN_LITTLE_ENDIAN
+#endif
+/* x86_64 */
+#if defined(__x86_64__) || defined(_M_X64)
+#define VCBLOCKCHAIN_LITTLE_ENDIAN
+#endif
+/* i386 */
+#if defined(__i386__) || defined(_M_IX86)
+#define VCBLOCKCHAIN_LITTLE_ENDIAN
+#endif
+
 /**
  * \brief Swap the endian representation of a given 32-bit value.
  *
@@ -37,19 +54,7 @@ inline int32_t bswap_32(int32_t val)
  *
  * \returns the swapped value.
  */
-inline int64_t bswap_64(int64_t val)
-{
-    uint64_t v = (uint64_t)val;
-
-    /* swap dword high / low. */
-    v = ((v & 0xFFFFFFFF00000000UL) >> 32) | ((v & 0x00000000FFFFFFFFUL) << 32);
-    /* swap word high / low. */
-    v = ((v & 0xFFFF0000FFFF0000UL) >> 16) | ((v & 0x0000FFFF0000FFFFUL) << 16);
-    /* swap byte high / low. */
-    v = ((v & 0xFF00FF00FF00FF00UL) >> 8) | ((v & 0x00FF00FF00FF00FFUL) << 8);
-
-    return v;
-}
+int64_t bswap_64(int64_t val);
 
 /**
  * \brief Perform a host to network byte order swap operation.
@@ -60,7 +65,7 @@ inline int64_t bswap_64(int64_t val)
  */
 inline int32_t htonl(int32_t val)
 {
-#ifdef LITTLE_ENDIAN
+#ifdef VCBLOCKCHAIN_LITTLE_ENDIAN
     return bswap_32(val);
 #else
     return val;
@@ -76,7 +81,7 @@ inline int32_t htonl(int32_t val)
  */
 inline int32_t ntohl(int32_t val)
 {
-#ifdef LITTLE_ENDIAN
+#ifdef VCBLOCKCHAIN_LITTLE_ENDIAN
     return bswap_32(val);
 #else
     return val;
@@ -90,14 +95,7 @@ inline int32_t ntohl(int32_t val)
  *
  * \returns the swapped value.
  */
-inline int64_t htonll(int64_t val)
-{
-#ifdef LITTLE_ENDIAN
-    return bswap_64(val);
-#else
-    return val;
-#endif
-}
+int64_t htonll(int64_t val);
 
 /**
  * \brief Perform a network to host byte order swap operation.
@@ -106,14 +104,7 @@ inline int64_t htonll(int64_t val)
  *
  * \returns the swapped value.
  */
-inline int64_t ntohll(int64_t val)
-{
-#ifdef LITTLE_ENDIAN
-    return bswap_64(val);
-#else
-    return val;
-#endif
-}
+int64_t ntohll(int64_t val);
 
 /* make this header C++ friendly. */
 #ifdef __cplusplus

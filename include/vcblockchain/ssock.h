@@ -311,7 +311,7 @@ int ssock_read_uint64(ssock* sock, uint64_t* val);
  *      - VCBLOCKCHAIN_ERROR_SSOCK_READ_UNEXPECTED_DATA_SIZE if the data size
  *        read from the socket was unexpected.
  */
-int ssock_read_int64_block(ssock* sock, int64_t* val);
+int ssock_read_int64(ssock* sock, int64_t* val);
 
 /**
  * \brief Read a uint8_t value from the socket.
@@ -330,7 +330,7 @@ int ssock_read_int64_block(ssock* sock, int64_t* val);
  *      - VCBLOCKCHAIN_ERROR_SSOCK_READ_UNEXPECTED_DATA_SIZE if the data size
  *        read from the socket was unexpected.
  */
-int ssock_read_uint8_block(ssock* sock, uint8_t* val);
+int ssock_read_uint8(ssock* sock, uint8_t* val);
 
 /**
  * \brief Read an int8_t value from the socket.
@@ -349,7 +349,7 @@ int ssock_read_uint8_block(ssock* sock, uint8_t* val);
  *      - VCBLOCKCHAIN_ERROR_SSOCK_READ_UNEXPECTED_DATA_SIZE if the data size
  *        read from the socket was unexpected.
  */
-int ssock_read_int8_block(ssock* sock, int8_t* val);
+int ssock_read_int8(ssock* sock, int8_t* val);
 
 /* make this header C++ friendly. */
 #ifdef __cplusplus

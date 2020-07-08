@@ -1,6 +1,6 @@
 project('vcblockchain', 'c', 'cpp',
   default_options : ['c_std=gnu11', 'cpp_std=c++14', 'buildtype=release'],
-  meson_version : '>=0.49.0'
+  meson_version : '>=0.53.0'
 )
 
 message('Using build type: ' + get_option('buildtype'))
@@ -55,11 +55,6 @@ lmdb = dependency('lmdb',
   fallback : ['lmdb', 'lmdb_dep']
 )
 
-libevent = dependency('libevent',
-  required : true,
-  fallback : ['libevent', 'event_dep']
-)
-
 vccrypt = dependency('vccrypt',
   required : true,
   fallback : ['vccrypt', 'vccrypt_dep']
@@ -86,13 +81,18 @@ vcdb_sub = subproject('vcdb')
 vcdb_lib = vcdb_sub.get_variable('vcdb_lib')
 vcdb_include = vcdb_sub.get_variable('vcdb_include')
 
+vcmodel_sub = subproject('vcmodel')
+vcmodel_include = vcmodel_sub.get_variable('vcmodel_include')
+
 lmdb_sub = subproject('lmdb')
 lmdb_include = lmdb_sub.get_variable('lmdb_inc')
 lmdb_lib = lmdb_sub.get_variable('lmdb')
 
-event_sub = subproject('libevent')
-event_include = event_sub.get_variable('event_include')
-event_lib = event_sub.get_variable('event_lib')
+cmake = import('cmake')
+event_sub = cmake.subproject(
+    'libevent', cmake_options: ['-DEVENT__DISABLE_OPENSSL=ON'])
+event_lib = event_sub.target('event_static')
+event_include = event_sub.include_directories('event_static')
 
 vcblockchain_include = include_directories('include')
 
@@ -107,13 +107,13 @@ objects = [
 
 vcblockchain_lib = static_library('vcblockchain', src,
   include_directories : vcblockchain_include,
-  dependencies : [vcmodel, vpr, vcdb, lmdb, libevent, vccert, vccrypt],
+  dependencies : [vcmodel, vpr, vcdb, lmdb, vccert, vccrypt],
   objects : objects
 )
 
 vcblockchain_test = executable('testvcblockchain', test_src,
   include_directories : vcblockchain_include,
-  dependencies : [gtest, vpr, vccert, vcdb, vccrypt, lmdb, libevent],
+  dependencies : [gtest, vpr, vccert, vcdb, vccrypt, lmdb],
   link_with : vcblockchain_lib
 )
 
@@ -126,6 +126,7 @@ vcblockchain_dep = declare_dependency(
 	vccert_include,
 	vccrypt_include,
 	vcdb_include,
+    vcmodel_include,
 	event_include,
     lmdb_include,
     vcblockchain_include

@@ -50,10 +50,14 @@ vcdb = dependency('vcdb',
   fallback : ['vcdb', 'vcdb_dep']
 )
 
-lmdb = dependency('lmdb',
-  required : true,
-  fallback : ['lmdb', 'lmdb_dep']
-)
+if meson.is_cross_build()
+  lmdb = disabler()
+else
+  lmdb = dependency('lmdb',
+    required : true,
+    fallback : ['lmdb', 'lmdb_dep']
+  )
+endif
 
 vccrypt = dependency('vccrypt',
   required : true,
@@ -84,51 +88,80 @@ vcdb_include = vcdb_sub.get_variable('vcdb_include')
 vcmodel_sub = subproject('vcmodel')
 vcmodel_include = vcmodel_sub.get_variable('vcmodel_include')
 
-lmdb_sub = subproject('lmdb')
+if meson.is_cross_build()
+  lmdb_sub = disabler()
+  message('lmdb disabled for cross build!')
+else
+  lmdb_sub = subproject('lmdb')
+endif
+
 lmdb_include = lmdb_sub.get_variable('lmdb_inc')
 lmdb_lib = lmdb_sub.get_variable('lmdb')
 
-cmake = import('cmake')
-event_sub = cmake.subproject(
-    'libevent', cmake_options: ['-DEVENT__DISABLE_OPENSSL=ON'])
+if meson.is_cross_build()
+  event_sub = disabler()
+  message('libevent disabled for cross build!')
+else
+  cmake = import('cmake')
+  event_sub = cmake.subproject('libevent', cmake_options: ['-DEVENT__DISABLE_OPENSSL=ON'])
+endif
+
 event_lib = event_sub.target('event_static')
 event_include = event_sub.include_directories('event_static')
-
-vcblockchain_include = include_directories('include')
 
 objects = [
   vpr_lib.extract_all_objects(),
   vccert_lib.extract_all_objects(),
   vcdb_lib.extract_all_objects(),
-  vccrypt_lib.extract_all_objects(),
-  lmdb_lib.extract_all_objects(),
-  event_lib.extract_all_objects()
+  vccrypt_lib.extract_all_objects()
 ]
 
+if lmdb_sub.found() 
+  objects += [lmdb_lib.extract_all_objects()]
+endif
+
+if event_sub.found()
+  objects += [event_lib.extract_all_objects()]
+endif
+
+vcblockchain_lib_deps = [vcmodel, vpr, vcdb, vccert, vccrypt]
+
+if lmdb.found()
+  vcblockchain_lib_deps += [lmdb]
+endif
+
+vcblockchain_include = include_directories('include')
+
 vcblockchain_lib = static_library('vcblockchain', src,
-  include_directories : vcblockchain_include,
-  dependencies : [vcmodel, vpr, vcdb, lmdb, vccert, vccrypt],
+  dependencies : vcblockchain_lib_deps,
+  include_directories: vcblockchain_include,
   objects : objects
 )
 
 vcblockchain_test = executable('testvcblockchain', test_src,
-  include_directories : vcblockchain_include,
   dependencies : [gtest, vpr, vccert, vcdb, vccrypt, lmdb],
   link_with : vcblockchain_lib
 )
 
 test('testvcblockchain', vcblockchain_test)
 
+vcblockchain_include_directories = [
+  vcblockchain_include,
+  vpr_include,
+  vccert_include,
+  vccert_include,
+  vcdb_include
+]
+
+if lmdb_sub.found()
+  vcblockchain_include_directories += [lmdb_include]
+endif
+
+if event_sub.found()
+  vcblockchain_include_directories += [event_include]
+endif
+
 vcblockchain_dep = declare_dependency(
   link_with : vcblockchain_lib,
-  include_directories : [
-	vpr_include,
-	vccert_include,
-	vccrypt_include,
-	vcdb_include,
-    vcmodel_include,
-	event_include,
-    lmdb_include,
-    vcblockchain_include
-  ]
+  include_directories : vcblockchain_include_directories
 )

@@ -149,7 +149,7 @@ vcblockchain_include_directories = [
   vcblockchain_include,
   vpr_include,
   vccert_include,
-  vccert_include,
+  vccrypt_include,
   vcdb_include
 ]
 
